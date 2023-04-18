@@ -1,0 +1,10 @@
+name: TestPlugin
+version: '${project.version}'
+main: dev.anhcraft.testplugin.TestPlugin
+api-version: 1.14
+commands:
+  upgrade:
+    description: Upgrade the sword
+    usage: /upgrade
+    permission: "testplugin.upgrade"
+    min-args: 0

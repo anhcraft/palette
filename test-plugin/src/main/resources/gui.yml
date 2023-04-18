@@ -1,0 +1,28 @@
+title: "&e&lSword Upgrade GUI"
+layout:
+  - +++++++++
+  - ++I+B+E++
+  - +++++++++
+components:
+  "+":
+    material: BLACK_STAINED_GLASS_PANE
+    name: "&a"
+  "I":
+    type: item
+    material: LIME_STAINED_GLASS_PANE
+    name: "&aItem"
+    lore:
+      - "&7» Put the sword to be upgraded"
+  "B":
+    type: buff
+    material: YELLOW_STAINED_GLASS_PANE
+    name: "&aBuff"
+    lore:
+      - "&7» Put the bonus item (Lapis) here"
+  "E":
+    type: executor
+    material: ANVIL
+    name: "&bUpgrade"
+    lore:
+      - "&7» Click to upgrade the item"
+      - "&7» Chance: &a{chance}%"
