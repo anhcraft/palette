@@ -32,6 +32,13 @@ public class Gui {
         }
     }
 
+    /**
+     * Renders the GUI for the given entity.
+     * @param humanEntity The entity
+     * @param guiHandlerClass The class of the GUI handler
+     * @return The inventory
+     * @throws InstantiationException If the GUI handler cannot be instantiated
+     */
     @NotNull
     public Inventory render(@NotNull HumanEntity humanEntity, @NotNull Class<? extends GuiHandler> guiHandlerClass) throws InstantiationException {
         GuiHandler guiHandler = (GuiHandler) ObjectUtil.newInstance(guiHandlerClass);
@@ -55,6 +62,11 @@ public class Gui {
         return inv;
     }
 
+    /**
+     * Opens a GUI for the given entity.
+     * @param humanEntity The entity to open the GUI for
+     * @param guiHandlerClass The class of the GUI handler
+     */
     public void open(@NotNull HumanEntity humanEntity, @NotNull Class<? extends GuiHandler> guiHandlerClass) {
         InventoryHolder h = humanEntity.getOpenInventory().getTopInventory().getHolder();
         if (h instanceof GuiHandler) {

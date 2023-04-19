@@ -26,7 +26,6 @@ public class ComponentItem extends ItemBuilder {
         return this.type;
     }
 
-
     @NotNull
     public ItemStack getBakedItem() {
         return bakedItem;

@@ -10,14 +10,30 @@ import org.jetbrains.annotations.Nullable;
 public class ItemUtil {
     public static final ItemStack EMPTY_ITEM = new ItemStack(Material.AIR);
 
+    /**
+     * Checks if an item is empty.
+     * @param item the item to be checked
+     * @return {@code true} if the item is empty, {@code false} otherwise
+     */
     public static boolean isEmpty(@Nullable ItemStack item) {
         return item == null || item.getType().isAir() || item.getAmount() == 0;
     }
 
+    /**
+     * Checks if an item is not empty.
+     * @param item the item to be checked
+     * @return {@code true} if the item is not empty, {@code false} otherwise
+     */
     public static boolean isPresent(@Nullable ItemStack item) {
         return !isEmpty(item);
     }
 
+    /**
+     * Splits the given item by {@code size}.
+     * @param item the item to be split
+     * @param size the size of the split
+     * @return a pair of the split item and the remainder
+     */
     public static Pair<ItemStack, ItemStack> splitItem(@NotNull ItemStack item, int size) {
         Preconditions.checkArgument(size > 0, "size must be positive");
 
@@ -39,10 +55,23 @@ public class ItemUtil {
         return new Pair<>(sub, rest);
     }
 
+    /**
+     * Adds the given amount to the given item.
+     * @param item the item to be modified
+     * @param addition the amount to be added
+     * @return a pair of the modified item and the remainder (which exceeded the maximum stack size)
+     */
     public static Pair<ItemStack, ItemStack> mergeItem(@NotNull ItemStack item, int addition) {
         return mergeItem(item, addition, item.getMaxStackSize());
     }
 
+    /**
+     * Adds the given amount to the given item.
+     * @param item the item to be modified
+     * @param addition the amount to be added
+     * @param maxStackSize the maximum stack size
+     * @return a pair of the modified item and the remainder (which exceeded the maximum stack size)
+     */
     public static Pair<ItemStack, ItemStack> mergeItem(@NotNull ItemStack item, int addition, int maxStackSize) {
         Preconditions.checkArgument(addition > 0, "addition must be positive");
         Preconditions.checkArgument(maxStackSize > 0, "maxStackSize must be positive");
@@ -62,6 +91,11 @@ public class ItemUtil {
         }
     }
 
+    /**
+     * Adds items to the given entity, and drops if the inventory is full
+     * @param entity the entity
+     * @param items the items to be added
+     */
     public static void addToInventory(@NotNull HumanEntity entity, @NotNull ItemStack ... items) {
         for (ItemStack i : entity.getInventory().addItem(items).values()) {
             entity.getWorld().dropItem(entity.getLocation(), i);

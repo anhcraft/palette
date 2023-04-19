@@ -47,7 +47,7 @@ public class EventListener implements Listener {
                 ItemStack cursor = event.getCursor();
                 boolean dirty = false;
 
-                // When taking out an item:et
+                // When taking out an item:
                 if (ItemUtil.isEmpty(cursor)) {
                     // If middle-clicked while in creative -> copy full stack
                     if (event.getClick() == ClickType.MIDDLE &&
