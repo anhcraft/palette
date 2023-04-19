@@ -3,7 +3,7 @@ package dev.anhcraft.testplugin;
 import dev.anhcraft.config.bukkit.BukkitConfigProvider;
 import dev.anhcraft.config.bukkit.struct.YamlConfigSection;
 import dev.anhcraft.config.schema.SchemaScanner;
-import dev.anhcraft.palette.config.Gui;
+import dev.anhcraft.palette.Gui;
 import dev.anhcraft.palette.listener.EventListener;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;

@@ -14,8 +14,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class UpgradeGuiHandler extends GuiHandler implements Refreshable {
     public UpgradeGuiHandler() {
-        getModifiableComponents().add("item");
-        getModifiableComponents().add("buff");
+        createModifiableComponent("item");
+        createModifiableComponent("buff").maxStackSize(32);
     }
 
     @Override
