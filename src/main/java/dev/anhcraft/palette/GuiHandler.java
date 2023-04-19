@@ -3,8 +3,8 @@ package dev.anhcraft.palette;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import dev.anhcraft.config.bukkit.utils.ItemBuilder;
-import dev.anhcraft.palette.config.Component;
 import dev.anhcraft.palette.util.ItemUtil;
+import dev.anhcraft.palette.util.Pair;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -13,16 +13,14 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 public abstract class GuiHandler implements InventoryHolder {
-    private final List<String> modifiableComponents = new ArrayList<>();
+    private final Map<String, ModifiableComponent> modifiableComponents = new HashMap<>();
     private Inventory inventory;
-    private Component[] backupLayer;
+    private ComponentItem[] backupLayer;
     private Multimap<String, Integer> slotByComponents = HashMultimap.create();
 
     @NotNull
@@ -35,16 +33,23 @@ public abstract class GuiHandler implements InventoryHolder {
     }
 
     @NotNull
-    public List<String> getModifiableComponents() {
+    public Map<String, ModifiableComponent> getModifiableComponents() {
         return this.modifiableComponents;
     }
 
     @NotNull
-    public Component[] getBackupLayer() {
+    public ModifiableComponent createModifiableComponent(@NotNull String type) {
+        ModifiableComponent component = new ModifiableComponent();
+        this.modifiableComponents.put(type, component);
+        return component;
+    }
+
+    @NotNull
+    public ComponentItem[] getBackupLayer() {
         return this.backupLayer;
     }
 
-    public void setBackupLayer(@NotNull Component[] backupLayer) {
+    public void setBackupLayer(@NotNull ComponentItem[] backupLayer) {
         this.backupLayer = backupLayer;
         HashMultimap<String, Integer> map = HashMultimap.create();
         for (int i = 0; i < backupLayer.length; ++i) {
@@ -120,8 +125,8 @@ public abstract class GuiHandler implements InventoryHolder {
         }
     }
 
-    public int findPlaceableSlot(@NotNull ItemStack item) {
-        for (String s : modifiableComponents) {
+    public int findEmptySlot(@NotNull ItemStack item) {
+        for (String s : modifiableComponents.keySet()) {
             if (canPut(s, item)) {
                 for (int i : slotByComponents.get(s)) {
                     if (ItemUtil.isEmpty(getActualItem(i))) {
@@ -133,9 +138,43 @@ public abstract class GuiHandler implements InventoryHolder {
         return -1;
     }
 
+    public int findPlaceableSlot(@NotNull ItemStack item) {
+        for (Map.Entry<String, ModifiableComponent> e : modifiableComponents.entrySet()) {
+            if (canPut(e.getKey(), item)) {
+                for (int i : slotByComponents.get(e.getKey())) {
+                    ItemStack target = getActualItem(i);
+                    if (ItemUtil.isEmpty(target) || (target.getAmount() < e.getValue().getMaxStackSize() && target.isSimilar(item))) {
+                        return i;
+                    }
+                }
+            }
+        }
+        return -1;
+    }
+
+    @NotNull
+    public ItemStack tryPlace(@NotNull ItemStack item) {
+        for (Map.Entry<String, ModifiableComponent> e : modifiableComponents.entrySet()) {
+            if (canPut(e.getKey(), item) && e.getValue().isAllowPlacing()) {
+                for (int i : slotByComponents.get(e.getKey())) {
+                    ItemStack target = getActualItem(i);
+                    if (ItemUtil.isEmpty(target)) {
+                        inventory.setItem(i, item);
+                        return ItemUtil.EMPTY_ITEM;
+                    } else if (target.getAmount() < e.getValue().getMaxStackSize() && target.isSimilar(item)) {
+                        Pair<ItemStack, ItemStack> p = ItemUtil.mergeItem(target, item.getAmount(), e.getValue().getMaxStackSize());
+                        inventory.setItem(i, p.getFirst());
+                        return p.getSecond();
+                    }
+                }
+            }
+        }
+        return item;
+    }
+
     @NotNull
     public ItemStack[] getCollectableItems() {
-        return modifiableComponents.stream().flatMap(this::streamPresentItems).toArray(ItemStack[]::new);
+        return modifiableComponents.keySet().stream().flatMap(this::streamPresentItems).toArray(ItemStack[]::new);
     }
 
     public abstract void onRendered(@NotNull HumanEntity humanEntity);

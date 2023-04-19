@@ -1,10 +1,8 @@
-package dev.anhcraft.palette.config;
+package dev.anhcraft.palette;
 
-import dev.anhcraft.config.ConfigDeserializer;
 import dev.anhcraft.config.annotations.Configurable;
 import dev.anhcraft.config.annotations.PostHandler;
 import dev.anhcraft.config.utils.ObjectUtil;
-import dev.anhcraft.palette.GuiHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -22,10 +20,10 @@ import java.util.stream.Collectors;
 public class Gui {
     public String title;
     public List<String> layout;
-    public Map<Character, Component> components;
+    public Map<Character, ComponentItem> components;
 
     @PostHandler
-    private void postHandle(ConfigDeserializer deserializer) {
+    private void postHandle() {
         layout = layout.stream().map(String::trim).collect(Collectors.toList());
         int max = layout.stream().mapToInt(String::length).max().orElse(0);
         for (String s : layout) {
@@ -39,12 +37,12 @@ public class Gui {
         GuiHandler guiHandler = (GuiHandler) ObjectUtil.newInstance(guiHandlerClass);
         Inventory inv = Bukkit.createInventory(guiHandler, layout.size() * 9, ChatColor.translateAlternateColorCodes('&', title));
         guiHandler.setInventory(inv);
-        Component[] backupLayer = new Component[inv.getSize()];
+        ComponentItem[] backupLayer = new ComponentItem[inv.getSize()];
         for (int y = 0; y < layout.size(); ++y) {
             String s = layout.get(y);
             for (int x = 0; x < s.length(); ++x) {
                 int i = y * 9 + x;
-                Component c = components.get(s.charAt(x));
+                ComponentItem c = components.get(s.charAt(x));
                 if (c == null) {
                     throw new RuntimeException("Component not found: " + s.charAt(x));
                 }

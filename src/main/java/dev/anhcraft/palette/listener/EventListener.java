@@ -1,15 +1,17 @@
 package dev.anhcraft.palette.listener;
 
 import dev.anhcraft.palette.GuiHandler;
+import dev.anhcraft.palette.ModifiableComponent;
 import dev.anhcraft.palette.Refreshable;
 import dev.anhcraft.palette.util.ItemUtil;
 import dev.anhcraft.palette.util.Pair;
+import org.bukkit.GameMode;
 import org.bukkit.Sound;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -26,10 +28,11 @@ public class EventListener implements Listener {
     }
 
     @EventHandler
-    public void handle(final InventoryClickEvent event) {
-        final Inventory inv = event.getClickedInventory();
-        if (inv == null) return;
-        final HumanEntity who = event.getWhoClicked();
+    public void handle(InventoryClickEvent event) {
+        Inventory inv = event.getClickedInventory();
+        if (inv == null || !(event.getWhoClicked() instanceof Player)) return;
+        Player who = (Player) event.getWhoClicked();
+        ItemStack clickedItem = event.getCurrentItem();
 
         // When clicking an item:
         if (inv.getHolder() instanceof GuiHandler) {
@@ -39,44 +42,94 @@ public class EventListener implements Listener {
             String type = gh.getComponentType(event.getSlot());
 
             // When interacting with a modifiable component:
-            if (gh.getModifiableComponents().contains(type)) {
+            ModifiableComponent mc = gh.getModifiableComponents().get(type);
+            if (mc != null) {
                 ItemStack cursor = event.getCursor();
-                ItemStack target = event.getCurrentItem();
                 boolean dirty = false;
 
-                // When taking out an item:
+                // When taking out an item:et
                 if (ItemUtil.isEmpty(cursor)) {
-                    ItemStack bg = gh.getBackupItem(event.getSlot());
-                    if (ItemUtil.isPresent(target) && !target.isSimilar(bg)) {
-                        ((Player) who).playSound(who.getLocation(), Sound.ENTITY_ITEM_FRAME_REMOVE_ITEM, 1.0f, 1.0f);
-                        event.setCurrentItem(bg);
-                        if (event.isShiftClick()) {
-                            ItemUtil.addToInventory(who, target);
-                        } else {
-                            who.setItemOnCursor(target);
+                    // If middle-clicked while in creative -> copy full stack
+                    if (event.getClick() == ClickType.MIDDLE &&
+                            who.getGameMode() == GameMode.CREATIVE &&
+                            ItemUtil.isPresent(clickedItem) &&
+                            !clickedItem.isSimilar(gh.getBackupItem(event.getSlot()))) {
+                        ItemStack itemOnCursor = clickedItem.clone();
+                        itemOnCursor.setAmount(clickedItem.getMaxStackSize());
+                        who.setItemOnCursor(itemOnCursor);
+                    }
+                    else if (mc.isAllowTaking()) {
+                        ItemStack bg = gh.getBackupItem(event.getSlot());
+                        // Only if the target is "empty":
+                        if (ItemUtil.isPresent(clickedItem) && !clickedItem.isSimilar(bg)) {
+                            if (event.isShiftClick()) {
+                                event.setCurrentItem(bg);
+                                ItemUtil.addToInventory(who, clickedItem);
+                            } else {
+                                // If right-clicked and has more than 1 -> divide by 2
+                                if (event.isRightClick() && clickedItem.getAmount() > 1) {
+                                    Pair<ItemStack, ItemStack> p = ItemUtil.splitItem(clickedItem, Math.floorDiv(clickedItem.getAmount(), 2));
+                                    event.setCurrentItem(p.getFirst());
+                                    who.setItemOnCursor(p.getSecond());
+                                }
+                                // Otherwise, take the whole item
+                                else {
+                                    event.setCurrentItem(bg);
+                                    who.setItemOnCursor(clickedItem);
+                                }
+                            }
+                            dirty = true;
+                            who.playSound(who.getLocation(), Sound.ENTITY_ITEM_FRAME_REMOVE_ITEM, 1.0f, 1.0f);
                         }
-                        dirty = true;
+                    } else {
+                        who.playSound(who.getLocation(), Sound.ITEM_SHIELD_BLOCK, 0.5f, 1.0f);
                     }
                 }
 
                 // When putting an item:
-                else if (gh.canPut(type, cursor)) {
-                    ((Player) who).playSound(who.getLocation(), Sound.ENTITY_ITEM_FRAME_ADD_ITEM, 1.0f, 1.0f);
+                else if (mc.isAllowPlacing() && gh.canPut(type, cursor)) {
                     ItemStack bg = gh.getBackupItem(event.getSlot());
-                    if (ItemUtil.isEmpty(target) || target.isSimilar(bg)) {
-                        Pair<ItemStack, ItemStack> p = ItemUtil.splitItem(cursor, 1);
+
+                    // If the target is "empty":
+                    if (ItemUtil.isEmpty(clickedItem) || clickedItem.isSimilar(bg)) {
+                        Pair<ItemStack, ItemStack> p = ItemUtil.splitItem(cursor, event.isRightClick() ? 1 : mc.getMaxStackSize());
                         event.setCurrentItem(p.getFirst());
                         who.setItemOnCursor(p.getSecond());
-                        dirty = true;
-                    } else {
-                        Pair<ItemStack, ItemStack> p = ItemUtil.splitItem(cursor, 1);
-                        event.setCurrentItem(p.getFirst());
-                        who.setItemOnCursor(target);
-                        ItemUtil.addToInventory(who, p.getSecond());
-                        dirty = true;
                     }
+
+                    // If the target is not "empty":
+                    else {
+                        // If the target is the same type as the cursor and not filled yet
+                        if (clickedItem.isSimilar(cursor) && clickedItem.getAmount() < mc.getMaxStackSize()) {
+                            // If right-clicked, merge by 1
+                            if (event.isRightClick()) {
+                                Pair<ItemStack, ItemStack> p = ItemUtil.mergeItem(clickedItem, 1, mc.getMaxStackSize());
+                                event.setCurrentItem(p.getFirst());
+                                if (p.getSecond() == ItemUtil.EMPTY_ITEM) {
+                                    ItemStack itemOnCursor = who.getItemOnCursor().clone();
+                                    itemOnCursor.setAmount(itemOnCursor.getAmount() - 1);
+                                    who.setItemOnCursor(itemOnCursor);
+                                }
+                            }
+                            // Otherwise, merge by all
+                            else {
+                                Pair<ItemStack, ItemStack> p = ItemUtil.mergeItem(clickedItem, cursor.getAmount(), mc.getMaxStackSize());
+                                event.setCurrentItem(p.getFirst());
+                                who.setItemOnCursor(p.getSecond());
+                            }
+                        }
+                        else {
+                            Pair<ItemStack, ItemStack> p = ItemUtil.splitItem(cursor, mc.getMaxStackSize());
+                            event.setCurrentItem(p.getFirst());
+                            who.setItemOnCursor(clickedItem);
+                            ItemUtil.addToInventory(who, p.getSecond());
+                        }
+                    }
+
+                    who.playSound(who.getLocation(), Sound.ENTITY_ITEM_FRAME_ADD_ITEM, 1.0f, 1.0f);
+                    dirty = true;
                 } else {
-                    ((Player) who).playSound(who.getLocation(), Sound.ITEM_SHIELD_BLOCK, 0.5f, 1.0f);
+                    who.playSound(who.getLocation(), Sound.ITEM_SHIELD_BLOCK, 0.5f, 1.0f);
                 }
 
                 if (dirty && event.getInventory().getHolder() instanceof Refreshable) {
@@ -98,21 +151,19 @@ public class EventListener implements Listener {
         else if (
                 event.getClick().isShiftClick() &&
                 event.getView().getTopInventory().getHolder() instanceof GuiHandler &&
-                ItemUtil.isPresent(event.getCurrentItem()) &&
+                ItemUtil.isPresent(clickedItem) &&
                 event.getView().convertSlot(event.getRawSlot()) != event.getRawSlot()
         ) {
             event.setCancelled(true);
             event.setResult(Event.Result.DENY);
 
-            final GuiHandler gh = (GuiHandler) event.getView().getTopInventory().getHolder();
-            final int slot = gh.findPlaceableSlot(event.getCurrentItem());
-            if (slot != -1) {
-                final Pair<ItemStack, ItemStack> item = ItemUtil.splitItem(event.getCurrentItem(), 1);
+            GuiHandler gh = (GuiHandler) event.getView().getTopInventory().getHolder();
+            ItemStack remain = gh.tryPlace(clickedItem);
+            if (!remain.equals(clickedItem)) {
+                inv.setItem(event.getSlot(), remain);
+                who.playSound(who.getLocation(), Sound.ENTITY_ITEM_FRAME_ADD_ITEM, 1.0f, 1.0f);
                 new BukkitRunnable() {
                     public void run() {
-                        inv.setItem(event.getSlot(), item.getSecond());
-                        gh.getInventory().setItem(slot, item.getFirst());
-                        ((Player) who).playSound(who.getLocation(), Sound.ENTITY_ITEM_FRAME_ADD_ITEM, 1.0f, 1.0f);
                         if (gh.getInventory().getHolder() instanceof Refreshable) {
                             ((Refreshable) gh.getInventory().getHolder()).refreshView(who);
                         }
@@ -123,7 +174,7 @@ public class EventListener implements Listener {
     }
 
     @EventHandler
-    public void handle(final InventoryDragEvent event) {
+    public void handle(InventoryDragEvent event) {
         if (event.getInventory().getHolder() instanceof GuiHandler) {
             if (event.getInventory().getHolder() instanceof Refreshable) {
                 new BukkitRunnable() {

@@ -1,4 +1,4 @@
-package dev.anhcraft.palette.config;
+package dev.anhcraft.palette;
 
 import dev.anhcraft.config.annotations.Configurable;
 import dev.anhcraft.config.annotations.PostHandler;
@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 @Configurable
-public class Component extends ItemBuilder {
+public class ComponentItem extends ItemBuilder {
     private String type;
     private ItemStack bakedItem;
 
