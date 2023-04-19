@@ -50,13 +50,13 @@ public class UpgradeGuiHandler extends GuiHandler implements Refreshable {
     }
 
     @Override
-    public boolean canPut(@NotNull String component, @NotNull ItemStack cursor) {
+    public boolean canPut(@NotNull String component, @NotNull ItemStack item) {
         if (component.equals("item")) {
-            return cursor.getType().name().endsWith("_SWORD");
+            return item.getType().name().endsWith("_SWORD");
         } else if (component.equals("buff")) {
-            return cursor.getType() == Material.LAPIS_LAZULI;
+            return item.getType() == Material.LAPIS_LAZULI;
         }
-        return super.canPut(component, cursor);
+        return super.canPut(component, item);
     }
 
     @Override

@@ -17,7 +17,7 @@ However, Palette does not mean to:
 - Create complex, animated GUIs
 - Replace existing menu plugins
 
-## Getting started
+## Getting Started
 First, every GUI must have its own configuration file:
 
 Take a quick example from the test plugin:<br>
@@ -152,13 +152,13 @@ public class UpgradeGuiHandler extends GuiHandler implements Refreshable {
     }
 
     @Override
-    public boolean canPut(@NotNull String component, @NotNull ItemStack cursor) {
+    public boolean canPut(@NotNull String component, @NotNull ItemStack item) {
         if (component.equals("item")) {
-            return cursor.getType().name().endsWith("_SWORD");
+            return item.getType().name().endsWith("_SWORD");
         } else if (component.equals("buff")) {
-            return cursor.getType() == Material.LAPIS_LAZULI;
+            return item.getType() == Material.LAPIS_LAZULI;
         }
-        return super.canPut(component, cursor);
+        return super.canPut(component, item);
     }
 
     @Override
@@ -179,6 +179,8 @@ There are four methods:
 - `onClick`: when the player clicks on a slot (and Palette could not handle the case)
 - `canPut`: check if the item can be put to a specific component
 - `refreshView`: call whenever Palette handles an interaction
+
+`onClose` is not specified since we want to preserve the default behaviour.
 
 With the idea from Getting Started section, we can implement GUI Handler step-by-step:
 
