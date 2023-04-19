@@ -1,7 +1,7 @@
 package dev.anhcraft.palette;
 
 public class ModifiableComponent {
-    private int maxStackSize = 1;
+    private int maxStackSize = 64;
     private boolean allowPlacing = true;
     private boolean allowTaking = true;
 
