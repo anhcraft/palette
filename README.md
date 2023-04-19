@@ -18,6 +18,9 @@ However, Palette does not mean to:
 - Create complex, animated GUIs
 - Replace existing menu plugins
 
+## Dependency
+Palette contains [Config](https://github.com/anhcraft/config) library to assist in serializing and deserializing configuration.
+
 ## Getting Started
 First, every GUI must have its own configuration file:
 
@@ -198,3 +201,33 @@ With the idea from Getting Started section, we can implement GUI Handler step-by
    - Then we calculate the chance, randomize and upgrade the item
    - Next, we update ingredient slots
    - Finally, it's important to re-update the chance
+
+## Load configuration
+Load from file or resource (inside .jar)
+```java
+try {
+   Gui upgradeGui = BukkitConfigProvider.YAML.createDeserializer().transformConfig(
+           Objects.requireNonNull(SchemaScanner.scanConfig(Gui.class)),
+           new YamlConfigSection(YamlConfiguration.loadConfiguration(new InputStreamReader(Objects.requireNonNull(TestPlugin.class.getResourceAsStream("/gui.yml")))))
+   );
+} catch (Exception e) {
+   throw new RuntimeException(e);
+}
+```
+
+```java
+try {
+   Gui upgradeGui = BukkitConfigProvider.YAML.createDeserializer().transformConfig(
+           Objects.requireNonNull(SchemaScanner.scanConfig(Gui.class)),
+           new YamlConfigSection(YamlConfiguration.loadConfiguration(new File("gui.yml")))
+   );
+} catch (Exception e) {
+   throw new RuntimeException(e);
+}
+```
+
+## Open the GUI!
+```java
+upgradeGui.open(player1, UpgradeGuiHandler.class);
+upgradeGui.open(player2, UpgradeGuiHandler.class); // etc...
+```
