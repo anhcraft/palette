@@ -10,6 +10,7 @@ Palette allows creating custom GUIs with following features:
 - Quick place/take support
 - Custom background
 - Custom stack size
+- Sounds on opening and clicking
 - Multiple components
 - Programmatically update the GUI
 
@@ -20,8 +21,7 @@ However, Palette does not mean to:
 ## Getting Started
 First, every GUI must have its own configuration file:
 
-Take a quick example from the test plugin:<br>
-Assume we want to create a simple item upgrade GUI
+Take a quick example from the test plugin: Assume we want to create a simple item upgrade GUI
 - First slot is the input/output - must be a sword
 - Second slot is the buff item to increase the chance - must be lapis lazuli
 - Third slot is a button to execute
@@ -99,9 +99,9 @@ Whenever a GUI instance is created:
 <br>
 
 Whenever the player interacts with GUI (place item, take out item, drag item, etc)
-1. Palette automatically handles common interactions such as: cloning a stack in creative mode, splitting item, merging item, etc
+1. Palette automatically handles common interactions on **modifiable components** such as: cloning a stack in creative mode, splitting item, merging item, etc
 - In this case, Palette will refresh the GUI if it is refreshable
-2. If Palette can't handle, it fallbacks the responsibility to the plugin by firing `onClick` event
+2. If the component is unmodifiable, it fallbacks the responsibility to the plugin by firing `onClick` event
 - Palette won't refresh the GUI no matter if it is refreshable
 <br>
 
@@ -112,7 +112,7 @@ Whenever the GUI is closed:
 ## Create GUI Handler
 A GUI handler is one that controls a GUI instance / view.
 
-Have a look at the test plugin:
+Take a look at the test plugin:
 ```java
 public class UpgradeGuiHandler extends GuiHandler implements Refreshable {
     public UpgradeGuiHandler() {
@@ -186,7 +186,7 @@ With the idea from Getting Started section, we can implement GUI Handler step-by
 
 1. When opened, replace the placeholder to its default value
    - This can be done using `onRendered` event
-2. Update the chance at real-time
+2. Update the chance automatically
    - This can be done using `refreshView` event
    - So whenever the sword or the buff item is put or taken out, the chance is re-updated
    - #1 and #2 can be combined to a single method as shown in the code
