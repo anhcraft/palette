@@ -83,6 +83,16 @@ public abstract class GuiHandler implements InventoryHolder {
     }
 
     /**
+     * Locates the given component.
+     * @param component component
+     * @return a collection of slots
+     */
+    @NotNull
+    public Collection<Integer> locateComponent(String component) {
+        return slotByComponents.get(component);
+    }
+
+    /**
      * Gets the actual item at the given slot.<br>
      * An actual item must be present and not be the background item.
      * @param slot the slot
