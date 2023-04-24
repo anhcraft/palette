@@ -6,28 +6,25 @@ Lightweight GUI library for Bukkit plugins.
 
 ## Feature
 Palette allows creating custom GUIs with following features:
-- Customizable using configuration
+- Customization using configuration
 - Quick place/take support
 - Custom background
 - Custom stack size
-- Sounds on opening and clicking
+- Playing sounds on opening and clicking
 - Multiple components
 - Programmatically update the GUI
 
-However, Palette does not mean to:
+However, Palette is not mean to:
 - Create complex, animated GUIs
 - Replace existing menu plugins
 
-## Dependency
-Palette contains [Config](https://github.com/anhcraft/config) library to assist in serializing and deserializing configuration.
-
 ## Getting Started
-First, every GUI must have its own configuration file:
+With Palette, every GUI must have its own configuration file.
 
 Take a quick example from the test plugin: Assume we want to create a simple item upgrade GUI
-- First slot is the input/output - must be a sword
-- Second slot is the buff item to increase the chance - must be lapis lazuli
-- Third slot is a button to execute
+- First component is the input/output - must be a sword
+- Second component is the buff item to increase the chance - must be lapis lazuli
+- Third component is a button to execute
 
 ```yaml
 title: "&e&lSword Upgrade GUI"
@@ -84,7 +81,7 @@ unbreakable: true
 - Background item: Since Palette allows customizable background item, we say that an item is background if it is either empty or be the background defined in the configuration
 - Backup layer: The backup layer contains all original items defined in the configuration
 - Backed item: To improve the performance, Palette creates a cached version of the original item (equivalent to the backup layer), that version is said to be baked
-- Actual item: Is any item that is existing in the current GUI which may be different from the configuration
+- Actual item: Is any item that is existing in the current GUI (which may be different from the configuration). If the actual item is background, it is treated as empty item.
 - Modifiable component: A modifiable component means it can be changed either by placing item or taking out item. With Palette, you can define the component to be placing-only or taking-out-only
 - Refreshable: Refreshable GUI requires the GUi to be refreshed / updated for every successful interaction. This is the essential interface to create dynamic GUIs with Palette.
 
@@ -96,7 +93,7 @@ On initialization:
 <br>
 
 Whenever a GUI instance is created:
-1. Create a `Inventory` with items from the backup layer
+1. Create an `Inventory` with items from the backup layer
 2. Fire `onRendered` event. During this time, the plugin can replace placeholders in name and lore.
 3. Show the inventory
 <br>
@@ -111,6 +108,60 @@ Whenever the player interacts with GUI (place item, take out item, drag item, et
 Whenever the GUI is closed:
 1. Palette tries to move items in modifiable components to the main inventory. If it is full, items will be dropped.
 2. Fire `onClose` event
+
+## Dependency
+Palette **contains** [Config](https://github.com/anhcraft/config) library to assist in serializing and deserializing configuration.
+
+## Add Palette as shadow dependency
+
+Example Maven configuration:
+```xml
+<repository>
+   <id>jitpack.io</id>
+   <url>https://jitpack.io</url>
+</repository>
+```
+```xml
+<dependency>
+   <groupId>dev.anhcraft</groupId>
+   <artifactId>palette</artifactId>
+   <version>VERSION</version>
+   <scope>compile</scope>
+</dependency>
+```
+
+Also, relocate Palette as well to prevent any conflicts. Example Maven configuration in pom.xml:
+```xml
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-shade-plugin</artifactId>
+  <version>VERSION</version>
+  <executions>
+    <execution>
+      <phase>package</phase>
+        <goals>
+          <goal>shade</goal>
+        </goals>
+        <configuration>
+          <relocations>
+            <relocation>
+              <pattern>dev.anhcraft.palette</pattern>
+              <shadedPattern>path.to.your.plugin.palette</shadedPattern>
+            </relocation>
+          </relocations>
+        </configuration>
+      </execution>
+    </executions>
+  </plugin>
+```
+(You can do the same with Gradle, just google)
+
+## Register event listener
+As your plugin is going to bundle Palette (shadow dependency), ensure the event listener is registered
+```java
+getServer().getPluginManager().registerEvents(new EventListener(plugin), plugin);
+```
+(EventListener is a class from Palette)
 
 ## Create GUI Handler
 A GUI handler is one that controls a GUI instance / view.
@@ -178,10 +229,10 @@ First, we define modifiable components, there are two: "item" and "buff". With "
 **Note: If we don't define the maximum stack size, it defaults to 64**
 
 There are four methods:
-- `onRendered`: call after the GUI is rendered and to be displayed to player
-- `onClick`: when the player clicks on a slot (and Palette could not handle the case)
-- `canPut`: check if the item can be put to a specific component
-- `refreshView`: call whenever Palette handles an interaction
+- `onRendered`: called after the GUI is rendered and to be displayed to player
+- `onClick`: when the player clicks on a slot (should be unmodifiable component)
+- `canPut`: checks if the item can be put into a specific component
+- `refreshView`: called whenever Palette handles an interaction
 
 `onClose` is not specified since we want to preserve the default behaviour.
 
@@ -203,7 +254,7 @@ With the idea from Getting Started section, we can implement GUI Handler step-by
    - Finally, it's important to re-update the chance
 
 ## Load configuration
-Load from file or resource (inside .jar)
+Load a resource (inside .jar):
 ```java
 try {
    Gui upgradeGui = BukkitConfigProvider.YAML.createDeserializer().transformConfig(
@@ -215,6 +266,7 @@ try {
 }
 ```
 
+Load from a file:
 ```java
 try {
    Gui upgradeGui = BukkitConfigProvider.YAML.createDeserializer().transformConfig(
