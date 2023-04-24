@@ -63,6 +63,6 @@ public class UpgradeGuiHandler extends GuiHandler implements Refreshable {
     public void refreshView(@NotNull HumanEntity humanEntity) {
         ItemStack buff = collectPresentItem("buff");
         double chance = Math.min(1.0, 0.5 + (buff == null ? 0 : 0.05 * buff.getAmount()));
-        replaceItems("executor", itemBuilder -> itemBuilder.replaceDisplay(s -> s.replace("{chance}", String.format("%.2f", chance))));
+        resetItems("executor", itemBuilder -> itemBuilder.replaceDisplay(s -> s.replace("{chance}", String.format("%.2f", chance))));
     }
 }

@@ -160,15 +160,33 @@ public abstract class GuiHandler implements InventoryHolder {
     }
 
     /**
-     * Replaces the items belonging to the given component.
+     * Resets the items belonging to the given component.
      * @param component the component
      * @param itemBuilderOperator an operator to handle item builder
      */
-    public void replaceItems(@NotNull String component, @NotNull UnaryOperator<ItemBuilder> itemBuilderOperator) {
+    public void resetItems(@NotNull String component, @NotNull UnaryOperator<ItemBuilder> itemBuilderOperator) {
         for (Integer i : slotByComponents.get(component)) {
             ItemStack item = itemBuilderOperator.apply(backupLayer[i].duplicate()).build();
             inventory.setItem(i, item);
         }
+    }
+
+    /**
+     * Resets the item at given slot.
+     * @param slot the slot
+     */
+    public void resetItem(int slot) {
+        inventory.setItem(slot, getBackupItem(slot));
+    }
+
+    /**
+     * Resets the item at given slot.
+     * @param slot the slot
+     * @param itemBuilderOperator an operator to handle item builder
+     */
+    public void resetItem(int slot, @NotNull UnaryOperator<ItemBuilder> itemBuilderOperator) {
+        ItemStack item = itemBuilderOperator.apply(backupLayer[slot].duplicate()).build();
+        inventory.setItem(slot, item);
     }
 
     /**
