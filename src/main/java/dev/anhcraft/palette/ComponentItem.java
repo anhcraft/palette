@@ -1,15 +1,17 @@
 package dev.anhcraft.palette;
 
 import dev.anhcraft.config.annotations.Configurable;
+import dev.anhcraft.config.annotations.Exclude;
 import dev.anhcraft.config.annotations.PostHandler;
 import dev.anhcraft.config.bukkit.utils.ItemBuilder;
-import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 @Configurable
 public class ComponentItem extends ItemBuilder {
     private String type;
+
+    @Exclude
     private ItemStack bakedItem;
 
     @PostHandler
@@ -17,7 +19,6 @@ public class ComponentItem extends ItemBuilder {
         if (type == null || (type = type.trim()).isEmpty()) {
             type = "unknown";
         }
-        replaceDisplay(s -> ChatColor.translateAlternateColorCodes('&', s));
         bakedItem = build();
     }
 
