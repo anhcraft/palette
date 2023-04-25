@@ -19,7 +19,7 @@ public class UpgradeGuiHandler extends GuiHandler implements Refreshable {
     }
 
     @Override
-    public void onRendered(@NotNull HumanEntity humanEntity) {
+    public void onPreOpen(@NotNull HumanEntity humanEntity) {
         refreshView(humanEntity);
     }
 

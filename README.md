@@ -94,7 +94,7 @@ On initialization:
 
 Whenever a GUI instance is created:
 1. Create an `Inventory` with items from the backup layer
-2. Fire `onRendered` event. During this time, the plugin can replace placeholders in name and lore.
+2. Fire `onPreOpen` event. During this time, the plugin can replace placeholders in name and lore.
 3. Show the inventory
 <br>
 
@@ -175,7 +175,7 @@ public class UpgradeGuiHandler extends GuiHandler implements Refreshable {
     }
 
     @Override
-    public void onRendered(@NotNull HumanEntity humanEntity) {
+    public void onPreOpen(@NotNull HumanEntity humanEntity) {
         refreshView(humanEntity);
     }
 
@@ -229,7 +229,7 @@ First, we define modifiable components, there are two: "item" and "buff". With "
 **Note: If we don't define the maximum stack size, it defaults to 64**
 
 There are four methods:
-- `onRendered`: called after the GUI is rendered and to be displayed to player
+- `onPreOpen`: called after the GUI is created and is going to be displayed to player
 - `onClick`: when the player clicks on a slot (should be unmodifiable component)
 - `canPut`: checks if the item can be put into a specific component
 - `refreshView`: called whenever Palette handles an interaction
@@ -239,7 +239,7 @@ There are four methods:
 With the idea from Getting Started section, we can implement GUI Handler step-by-step:
 
 1. When opened, replace the placeholder to its default value
-   - This can be done using `onRendered` event
+   - This can be done using `onPreOpen` event
 2. Update the chance automatically
    - This can be done using `refreshView` event
    - So whenever the sword or the buff item is put or taken out, the chance is re-updated

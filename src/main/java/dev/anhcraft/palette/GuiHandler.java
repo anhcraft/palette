@@ -285,7 +285,7 @@ public abstract class GuiHandler implements InventoryHolder {
      * Called when an {@link Inventory} is created, items are put and the inventory is going to be shown to viewer.
      * @param humanEntity the viewer
      */
-    public abstract void onRendered(@NotNull HumanEntity humanEntity);
+    public abstract void onPreOpen(@NotNull HumanEntity humanEntity);
 
     /**
      * Called when someone clicks on a component.

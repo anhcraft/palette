@@ -59,7 +59,7 @@ public class Gui {
         }
         guiHandler.setBackupLayer(backupLayer);
         guiHandler.renderBackupLayer();
-        guiHandler.onRendered(humanEntity);
+        guiHandler.onPreOpen(humanEntity);
         humanEntity.openInventory(inv);
     }
 }
