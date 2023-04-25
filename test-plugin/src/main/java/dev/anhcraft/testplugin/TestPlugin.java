@@ -29,7 +29,7 @@ public final class TestPlugin extends JavaPlugin {
 
         Objects.requireNonNull(getCommand("upgrade")).setExecutor((sender, command, label, args) -> {
             if (sender instanceof Player && sender.hasPermission("testplugin.upgrade")) {
-                upgradeGui.open((Player) sender, UpgradeGuiHandler.class);
+                upgradeGui.open((Player) sender, new UpgradeGuiHandler());
                 return true;
             }
             return false;

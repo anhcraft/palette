@@ -2,7 +2,6 @@ package dev.anhcraft.palette;
 
 import dev.anhcraft.config.annotations.Configurable;
 import dev.anhcraft.config.annotations.PostHandler;
-import dev.anhcraft.config.utils.ObjectUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -29,19 +28,6 @@ public class Gui {
         for (String s : layout) {
             if (s.length() >= max) continue;
             throw new RuntimeException("Invalid layout detected! Max = " + max);
-        }
-    }
-
-    /**
-     * Opens a GUI for the given entity.
-     * @param humanEntity The entity to open the GUI for
-     * @param guiHandlerClass The class of the GUI handler
-     */
-    public void open(@NotNull HumanEntity humanEntity, @NotNull Class<? extends GuiHandler> guiHandlerClass) {
-        try {
-            open(humanEntity, (GuiHandler) ObjectUtil.newInstance(guiHandlerClass));
-        } catch (InstantiationException e) {
-            throw new RuntimeException(e);
         }
     }
 

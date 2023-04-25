@@ -280,6 +280,6 @@ try {
 
 ## Open the GUI!
 ```java
-upgradeGui.open(player1, UpgradeGuiHandler.class);
-upgradeGui.open(player2, UpgradeGuiHandler.class); // etc...
+upgradeGui.open(player1, new UpgradeGuiHandler());
+upgradeGui.open(player2, new UpgradeGuiHandler()); // etc...
 ```
