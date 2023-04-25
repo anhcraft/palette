@@ -159,9 +159,9 @@ Also, relocate Palette as well to prevent any conflicts. Example Maven configura
 ## Register event listener
 As your plugin is going to bundle Palette (shadow dependency), ensure the event listener is registered
 ```java
-getServer().getPluginManager().registerEvents(new EventListener(plugin), plugin);
+getServer().getPluginManager().registerEvents(new GuiEventListener(plugin), plugin);
 ```
-(EventListener is a class from Palette)
+(GuiEventListener is a class from Palette)
 
 ## Create GUI Handler
 A GUI handler is one that controls a GUI instance / view.

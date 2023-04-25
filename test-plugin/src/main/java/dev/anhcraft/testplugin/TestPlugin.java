@@ -4,7 +4,7 @@ import dev.anhcraft.config.bukkit.BukkitConfigProvider;
 import dev.anhcraft.config.bukkit.struct.YamlConfigSection;
 import dev.anhcraft.config.schema.SchemaScanner;
 import dev.anhcraft.palette.Gui;
-import dev.anhcraft.palette.listener.EventListener;
+import dev.anhcraft.palette.listener.GuiEventListener;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -25,7 +25,7 @@ public final class TestPlugin extends JavaPlugin {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        getServer().getPluginManager().registerEvents(new EventListener(this), this);
+        getServer().getPluginManager().registerEvents(new GuiEventListener(this), this);
 
         Objects.requireNonNull(getCommand("upgrade")).setExecutor((sender, command, label, args) -> {
             if (sender instanceof Player && sender.hasPermission("testplugin.upgrade")) {

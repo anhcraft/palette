@@ -20,10 +20,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public class EventListener implements Listener {
+public class GuiEventListener implements Listener {
     private final Plugin plugin;
 
-    public EventListener(Plugin plugin) {
+    public GuiEventListener(Plugin plugin) {
         this.plugin = plugin;
     }
 
