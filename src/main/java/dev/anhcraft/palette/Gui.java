@@ -33,15 +33,30 @@ public class Gui {
     }
 
     /**
-     * Renders the GUI for the given entity.
-     * @param humanEntity The entity
+     * Opens a GUI for the given entity.
+     * @param humanEntity The entity to open the GUI for
      * @param guiHandlerClass The class of the GUI handler
-     * @return The inventory
-     * @throws InstantiationException If the GUI handler cannot be instantiated
      */
-    @NotNull
-    public Inventory render(@NotNull HumanEntity humanEntity, @NotNull Class<? extends GuiHandler> guiHandlerClass) throws InstantiationException {
-        GuiHandler guiHandler = (GuiHandler) ObjectUtil.newInstance(guiHandlerClass);
+    public void open(@NotNull HumanEntity humanEntity, @NotNull Class<? extends GuiHandler> guiHandlerClass) {
+        try {
+            open(humanEntity, (GuiHandler) ObjectUtil.newInstance(guiHandlerClass));
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Opens a GUI for the given entity.
+     * @param humanEntity The entity to open the GUI for
+     * @param guiHandler The GUI handler
+     */
+    public void open(@NotNull HumanEntity humanEntity, @NotNull GuiHandler guiHandler) {
+        InventoryHolder h = humanEntity.getOpenInventory().getTopInventory().getHolder();
+        if (h instanceof GuiHandler) {
+            ((GuiHandler) h).onClose(humanEntity);
+        }
+
+        ((Player) humanEntity).playSound(humanEntity.getLocation(), Sound.UI_TOAST_IN, 1.0f, 1.0f);
         Inventory inv = Bukkit.createInventory(guiHandler, layout.size() * 9, ChatColor.translateAlternateColorCodes('&', title));
         guiHandler.setInventory(inv);
         ComponentItem[] backupLayer = new ComponentItem[inv.getSize()];
@@ -59,24 +74,6 @@ public class Gui {
         guiHandler.setBackupLayer(backupLayer);
         guiHandler.renderBackupLayer();
         guiHandler.onRendered(humanEntity);
-        return inv;
-    }
-
-    /**
-     * Opens a GUI for the given entity.
-     * @param humanEntity The entity to open the GUI for
-     * @param guiHandlerClass The class of the GUI handler
-     */
-    public void open(@NotNull HumanEntity humanEntity, @NotNull Class<? extends GuiHandler> guiHandlerClass) {
-        InventoryHolder h = humanEntity.getOpenInventory().getTopInventory().getHolder();
-        if (h instanceof GuiHandler) {
-            ((GuiHandler) h).onClose(humanEntity);
-        }
-        ((Player) humanEntity).playSound(humanEntity.getLocation(), Sound.UI_TOAST_IN, 1.0f, 1.0f);
-        try {
-            humanEntity.openInventory(render(humanEntity, guiHandlerClass));
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        }
+        humanEntity.openInventory(inv);
     }
 }
