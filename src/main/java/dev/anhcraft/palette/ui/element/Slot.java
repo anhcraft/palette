@@ -74,7 +74,7 @@ public class Slot {
 
     public <T extends Event> void emitEvent(Class<T> clazz, Consumer<T> consumer) {
         for (Event event : events) {
-            if (event.getClass().isAssignableFrom(clazz)) {
+            if (clazz.isInstance(event)) {
                 //noinspection unchecked
                 consumer.accept((T) event);
             }
@@ -83,7 +83,7 @@ public class Slot {
 
     public <T extends Event> boolean emitBoolEvent(Class<T> clazz, Function<T, Boolean> consumer) {
         for (Event event : events) {
-            if (event.getClass().isAssignableFrom(clazz)) {
+            if (clazz.isInstance(event)) {
                 //noinspection unchecked
                 if (!consumer.apply((T) event)) {
                     return false;
