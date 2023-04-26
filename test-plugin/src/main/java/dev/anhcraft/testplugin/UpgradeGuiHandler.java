@@ -1,31 +1,30 @@
 package dev.anhcraft.testplugin;
 
-import dev.anhcraft.palette.GuiHandler;
-import dev.anhcraft.palette.Refreshable;
+import dev.anhcraft.palette.event.ClickEvent;
+import dev.anhcraft.palette.ui.GuiHandler;
+import dev.anhcraft.palette.ui.element.Modifiability;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public class UpgradeGuiHandler extends GuiHandler implements Refreshable {
+public class UpgradeGuiHandler extends GuiHandler {
+
     public UpgradeGuiHandler() {
-        createModifiableComponent("item");
-        createModifiableComponent("buff").maxStackSize(32);
-    }
+        visitComponent("item", slot -> {
+            slot.setModifiability(new Modifiability().filter(itemStack -> itemStack.getType().name().endsWith("_SWORD")));
+        });
+        visitComponent("buff", slot -> {
+            slot.setModifiability(new Modifiability()
+                    .maxStackSize(32)
+                    .filter(itemStack -> itemStack.getType() == Material.LAPIS_LAZULI));
+        });
 
-    @Override
-    public void onPreOpen(@NotNull HumanEntity humanEntity) {
-        refreshView(humanEntity);
-    }
-
-    @Override
-    public void onClick(@NotNull InventoryClickEvent clickEvent, @NotNull String component) {
-        if (component.equals("executor")) {
+        listen("executor", (ClickEvent) (clickEvent, player, slot) -> {
             ItemStack item = collectPresentItem("item");
             if (item == null) {
                 clickEvent.getWhoClicked().sendMessage(ChatColor.RED + "No item.");
@@ -38,31 +37,27 @@ public class UpgradeGuiHandler extends GuiHandler implements Refreshable {
             if (ThreadLocalRandom.current().nextDouble() < chance) {
                 item.addEnchantment(Enchantment.DAMAGE_ALL, 3);
                 item.addEnchantment(Enchantment.FIRE_ASPECT, 2);
-                setItemOnce("item", item);
+                setBulk("item", item);
                 clickEvent.getWhoClicked().sendMessage(ChatColor.GREEN + "Upgrade successful.");
             } else {
                 clickEvent.getWhoClicked().sendMessage(ChatColor.RED + "Upgrade failed.");
             }
 
-            resetItems("buff");
-            refreshView(clickEvent.getWhoClicked());
-        }
+            resetBulk("buff");
+            refreshView();
+        });
     }
 
     @Override
-    public boolean canPut(@NotNull String component, @NotNull ItemStack item) {
-        if (component.equals("item")) {
-            return item.getType().name().endsWith("_SWORD");
-        } else if (component.equals("buff")) {
-            return item.getType() == Material.LAPIS_LAZULI;
-        }
-        return super.canPut(component, item);
+    public void onPreOpen(@NotNull Player player) {
+        refreshView();
     }
 
-    @Override
-    public void refreshView(@NotNull HumanEntity humanEntity) {
+    public void refreshView() {
         ItemStack buff = collectPresentItem("buff");
         double chance = Math.min(1.0, 0.5 + (buff == null ? 0 : 0.05 * buff.getAmount()));
-        resetItems("executor", itemBuilder -> itemBuilder.replaceDisplay(s -> s.replace("{chance}", String.format("%.2f", chance))));
+        replaceItem("executor", (slot, itemBuilder) -> {
+            return itemBuilder.replaceDisplay(s -> s.replace("{chance}", String.format("%.2f", chance)));
+        });
     }
 }

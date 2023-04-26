@@ -1,6 +1,7 @@
-package dev.anhcraft.palette;
+package dev.anhcraft.palette.ui.element;
 
 import dev.anhcraft.config.annotations.Configurable;
+import dev.anhcraft.config.annotations.Description;
 import dev.anhcraft.config.annotations.Exclude;
 import dev.anhcraft.config.annotations.PostHandler;
 import dev.anhcraft.config.bukkit.utils.ItemBuilder;
@@ -8,7 +9,8 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 @Configurable
-public class ComponentItem extends ItemBuilder {
+public class Component extends ItemBuilder {
+    @Description("The type of the component")
     private String type;
 
     @Exclude

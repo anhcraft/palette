@@ -7,6 +7,8 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+
 public class ItemUtil {
     public static final ItemStack EMPTY_ITEM = new ItemStack(Material.AIR);
 
@@ -100,5 +102,14 @@ public class ItemUtil {
         for (ItemStack i : entity.getInventory().addItem(items).values()) {
             entity.getWorld().dropItem(entity.getLocation(), i);
         }
+    }
+
+    /**
+     * Adds items to the given entity, and drops if the inventory is full
+     * @param entity the entity
+     * @param items the items to be added
+     */
+    public static void addToInventory(@NotNull HumanEntity entity, @NotNull Collection<ItemStack> items) {
+        addToInventory(entity, items.toArray(new ItemStack[0]));
     }
 }
