@@ -51,7 +51,7 @@ public class Modifiability {
     }
 
     public boolean canPlace(@NotNull ItemStack itemStack) {
-        return itemFilter == null || itemFilter.accept(itemStack);
+        return allowPlacing && (itemFilter == null || itemFilter.accept(itemStack));
     }
 
     /**

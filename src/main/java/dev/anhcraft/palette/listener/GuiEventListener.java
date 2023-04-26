@@ -100,7 +100,7 @@ public class GuiEventListener implements Listener {
             }
 
             // When putting an item:
-            else if (modifiability.isAllowPlacing() && modifiability.canPlace(cursor)) {
+            else if (modifiability.canPlace(cursor)) {
                 ItemStack newCurrent;
                 ItemStack newCursor = cursor;
 

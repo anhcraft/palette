@@ -272,7 +272,7 @@ public abstract class GuiHandler implements InventoryHolder {
                 continue;
             }
             Modifiability modifiability = slots[i].getModifiability();
-            if (modifiability != null && modifiability.isAllowPlacing()) {
+            if (modifiability != null && modifiability.canPlace(item)) {
                 ItemStack current = getActualItem(i);
                 int oldAmount = 0;
                 int expectedNewAmount = item.getAmount();
@@ -287,6 +287,9 @@ public abstract class GuiHandler implements InventoryHolder {
                 }
 
                 int stackSize = Math.min(item.getMaxStackSize(), modifiability.getMaxStackSize());
+                if (oldAmount >= stackSize) {
+                    continue;
+                }
                 int actualNewAmount = Math.min(stackSize, expectedNewAmount);
                 if (!test) {
                     ItemStack toBePlaced = item.clone();
