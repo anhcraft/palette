@@ -14,7 +14,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class UpgradeGuiHandler extends GuiHandler {
 
-    public UpgradeGuiHandler() {
+    @Override
+    public void onPreOpen(@NotNull Player player) {
         visitComponent("item", slot -> {
             slot.setModifiability(new Modifiability().filter(itemStack -> itemStack.getType().name().endsWith("_SWORD")));
         });
@@ -24,7 +25,7 @@ public class UpgradeGuiHandler extends GuiHandler {
                     .filter(itemStack -> itemStack.getType() == Material.LAPIS_LAZULI));
         });
 
-        listen("executor", (ClickEvent) (clickEvent, player, slot) -> {
+        listen("executor", (ClickEvent) (clickEvent, player1, slot) -> {
             ItemStack item = collectPresentItem("item");
             if (item == null) {
                 clickEvent.getWhoClicked().sendMessage(ChatColor.RED + "No item.");
@@ -46,10 +47,7 @@ public class UpgradeGuiHandler extends GuiHandler {
             resetBulk("buff");
             refreshView();
         });
-    }
 
-    @Override
-    public void onPreOpen(@NotNull Player player) {
         refreshView();
     }
 
