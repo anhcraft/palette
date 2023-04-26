@@ -2,6 +2,7 @@ package dev.anhcraft.palette;
 
 import dev.anhcraft.config.annotations.Configurable;
 import dev.anhcraft.config.annotations.PostHandler;
+import dev.anhcraft.config.annotations.Validation;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -18,8 +19,13 @@ import java.util.stream.Collectors;
 @Configurable
 public class Gui {
     public String title;
+
     public List<String> layout;
+
     public Map<Character, ComponentItem> components;
+
+    @Validation(notNull = true, silent = true)
+    public Sound openSound = Sound.UI_TOAST_IN;
 
     @PostHandler
     private void postHandle() {
@@ -42,10 +48,11 @@ public class Gui {
             ((GuiHandler) h).onClose(humanEntity);
         }
 
-        ((Player) humanEntity).playSound(humanEntity.getLocation(), Sound.UI_TOAST_IN, 1.0f, 1.0f);
         Inventory inv = Bukkit.createInventory(guiHandler, layout.size() * 9, ChatColor.translateAlternateColorCodes('&', title));
         guiHandler.setInventory(inv);
+
         ComponentItem[] backupLayer = new ComponentItem[inv.getSize()];
+
         for (int y = 0; y < layout.size(); ++y) {
             String s = layout.get(y);
             for (int x = 0; x < s.length(); ++x) {
@@ -57,9 +64,11 @@ public class Gui {
                 backupLayer[i] = c;
             }
         }
+
         guiHandler.setBackupLayer(backupLayer);
         guiHandler.renderBackupLayer();
         guiHandler.onPreOpen(humanEntity);
         humanEntity.openInventory(inv);
+        ((Player) humanEntity).playSound(humanEntity.getLocation(), openSound, 1.0f, 1.0f);
     }
 }
