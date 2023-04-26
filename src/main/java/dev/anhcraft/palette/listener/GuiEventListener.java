@@ -126,7 +126,7 @@ public class GuiEventListener implements Listener {
                             Pair<ItemStack, ItemStack> p = ItemUtil.mergeItem(clickedItem, 1, modifiability.getMaxStackSize());
                             newCurrent = p.getFirst();
                             if (p.getSecond() == ItemUtil.EMPTY_ITEM) {
-                                ItemStack itemOnCursor = who.getItemOnCursor().clone();
+                                ItemStack itemOnCursor = cursor.clone();
                                 itemOnCursor.setAmount(itemOnCursor.getAmount() - 1);
                                 newCursor = itemOnCursor;
                             }
