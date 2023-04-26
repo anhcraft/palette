@@ -170,7 +170,7 @@ public class GuiEventListener implements Listener {
             GuiHandler gh = (GuiHandler) event.getView().getTopInventory().getHolder();
             ItemPlaceResult result = gh.placeItem(clickedItem, null, true);
             if (result.getSlot() != -1) {
-                boolean ok = gh.getSlot(slotIndex).emitBoolEvent(PrePlaceEvent.class, e -> e.onPrePlace(Action.QUICK_PLACE, who, slotIndex, clickedItem));
+                boolean ok = gh.getSlot(result.getSlot()).emitBoolEvent(PrePlaceEvent.class, e -> e.onPrePlace(Action.QUICK_PLACE, who, slotIndex, clickedItem));
                 if (ok) {
                     ItemStack target = clickedItem.clone();
                     target.setAmount(result.getTargetNewAmount());
@@ -184,7 +184,7 @@ public class GuiEventListener implements Listener {
                         event.setCurrentItem(ItemUtil.EMPTY_ITEM);
                     }
 
-                    gh.getSlot(slotIndex).emitEvent(PostPlaceEvent.class, e -> e.onPostPlace(Action.QUICK_PLACE, who, slotIndex, clickedItem));
+                    gh.getSlot(result.getSlot()).emitEvent(PostPlaceEvent.class, e -> e.onPostPlace(Action.QUICK_PLACE, who, slotIndex, clickedItem));
                 }
             }
         }
