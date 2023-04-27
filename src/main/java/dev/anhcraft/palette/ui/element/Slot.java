@@ -8,13 +8,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Slot {
     private final Component component;
-    private final List<Event> events = new ArrayList<>();
+    private List<Event> events = new ArrayList<>();
     private Modifiability modifiability;
 
     public Slot(@NotNull Component component) {
@@ -59,6 +60,14 @@ public class Slot {
         return events;
     }
 
+    public void setEvents(@NotNull List<Event> events) {
+        this.events = events;
+    }
+
+    public void setEvents(@NotNull Event... events) {
+        this.events.addAll(Arrays.asList(events));
+    }
+
     public void listen(@NotNull Event event) {
         events.add(event);
     }
@@ -70,6 +79,13 @@ public class Slot {
 
     public void setModifiability(@Nullable Modifiability modifiability) {
         this.modifiability = modifiability;
+    }
+
+    @NotNull
+    public Modifiability makeModifiable() {
+        Modifiability modifiability = new Modifiability();
+        setModifiability(modifiability);
+        return modifiability;
     }
 
     public <T extends Event> void emitEvent(Class<T> clazz, Consumer<T> consumer) {

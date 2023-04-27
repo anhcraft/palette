@@ -2,7 +2,6 @@ package dev.anhcraft.testplugin;
 
 import dev.anhcraft.palette.event.ClickEvent;
 import dev.anhcraft.palette.ui.GuiHandler;
-import dev.anhcraft.palette.ui.element.Modifiability;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -17,12 +16,10 @@ public class UpgradeGuiHandler extends GuiHandler {
     @Override
     public void onPreOpen(@NotNull Player player) {
         visitComponent("item", slot -> {
-            slot.setModifiability(new Modifiability().filter(itemStack -> itemStack.getType().name().endsWith("_SWORD")));
+            slot.makeModifiable().filter(itemStack -> itemStack.getType().name().endsWith("_SWORD"));
         });
         visitComponent("buff", slot -> {
-            slot.setModifiability(new Modifiability()
-                    .maxStackSize(32)
-                    .filter(itemStack -> itemStack.getType() == Material.LAPIS_LAZULI));
+            slot.makeModifiable().maxStackSize(32).filter(itemStack -> itemStack.getType() == Material.LAPIS_LAZULI);
         });
 
         listen("executor", (ClickEvent) (clickEvent, player1, slot) -> {
