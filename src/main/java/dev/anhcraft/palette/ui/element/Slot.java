@@ -9,13 +9,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Slot {
     private final Component component;
-    private List<Event> events = new ArrayList<>();
+    private List<Event> events = Collections.synchronizedList(new ArrayList<>());
     private Modifiability modifiability;
 
     public Slot(@NotNull Component component) {
@@ -57,15 +58,15 @@ public class Slot {
 
     @NotNull
     public List<Event> getEvents() {
-        return events;
+        return Collections.unmodifiableList(events);
     }
 
     public void setEvents(@NotNull List<Event> events) {
-        this.events = events;
+        this.events = Collections.synchronizedList(events);
     }
 
     public void setEvents(@NotNull Event... events) {
-        this.events.addAll(Arrays.asList(events));
+        this.events = Collections.synchronizedList(Arrays.asList(events));
     }
 
     public void listen(@NotNull Event event) {
