@@ -1,9 +1,6 @@
 package dev.anhcraft.palette.ui;
 
-import dev.anhcraft.config.annotations.Configurable;
-import dev.anhcraft.config.annotations.Description;
-import dev.anhcraft.config.annotations.PostHandler;
-import dev.anhcraft.config.annotations.Validation;
+import dev.anhcraft.config.annotations.*;
 import dev.anhcraft.palette.ui.element.Component;
 import dev.anhcraft.palette.ui.element.Slot;
 import org.bukkit.Bukkit;
@@ -32,7 +29,7 @@ public class Gui {
     public Map<Character, Component> components;
 
     @Description("The sound to play when opening the GUI")
-    @Validation(notNull = true, silent = true)
+    @Optional
     public Sound openSound = Sound.UI_TOAST_IN;
 
     @PostHandler

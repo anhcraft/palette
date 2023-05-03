@@ -110,7 +110,7 @@ Whenever the GUI is closed:
 2. Fire `onClose` event
 
 ## Dependency
-Palette **contains** [Config](https://github.com/anhcraft/config) library to assist in serializing and deserializing configuration.
+Palette **requires** [Config](https://github.com/anhcraft/config) library to assist in serializing and deserializing configuration.
 
 ## Add Palette as shadow dependency
 
@@ -123,9 +123,15 @@ Example Maven configuration:
 ```
 ```xml
 <dependency>
-   <groupId>dev.anhcraft</groupId>
+   <groupId>com.github.anhcraft</groupId>
    <artifactId>palette</artifactId>
-   <version>VERSION</version>
+   <version>v1.0.2</version>
+   <scope>compile</scope>
+</dependency>
+<dependency>
+   <groupId>com.github.anhcraft.config</groupId>
+   <artifactId>config.bukkit</artifactId>
+   <version>v1.1.5</version>
    <scope>compile</scope>
 </dependency>
 ```
