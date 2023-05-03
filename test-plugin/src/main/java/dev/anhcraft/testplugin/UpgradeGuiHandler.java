@@ -15,13 +15,19 @@ public class UpgradeGuiHandler extends GuiHandler {
 
     @Override
     public void onPreOpen(@NotNull Player player) {
+        // Visits all slots belonging to the component "item", then marks them as modifiable. Sword is the only item
+        // allowed to be put in
         visitComponent("item", slot -> {
             slot.makeModifiable().filter(itemStack -> itemStack.getType().name().endsWith("_SWORD"));
         });
+
+        // Visits all slots belonging to the component "buff", then marks them as modifiable. Lapis is the only item
+        // allowed to be put in. The maximum stack size is reduced to 32.
         visitComponent("buff", slot -> {
             slot.makeModifiable().maxStackSize(32).filter(itemStack -> itemStack.getType() == Material.LAPIS_LAZULI);
         });
 
+        // Listens to click event on all slots belonging to component "executor"
         listen("executor", (ClickEvent) (clickEvent, player1, slot) -> {
             ItemStack item = collectPresentItem("item");
             if (item == null) {
@@ -29,6 +35,7 @@ public class UpgradeGuiHandler extends GuiHandler {
                 return;
             }
 
+            // Collect the first present item from component "buff"
             ItemStack buff = collectPresentItem("buff");
             double chance = Math.min(1.0, 0.5 + (buff == null ? 0 : 0.05 * buff.getAmount()));
 
@@ -41,16 +48,21 @@ public class UpgradeGuiHandler extends GuiHandler {
                 clickEvent.getWhoClicked().sendMessage(ChatColor.RED + "Upgrade failed.");
             }
 
+            // Reset the component "buff"
             resetBulk("buff");
+
+            // Update the GUI
             refreshView();
         });
 
+        // Initial update
         refreshView();
     }
 
     public void refreshView() {
         ItemStack buff = collectPresentItem("buff");
         double chance = Math.min(1.0, 0.5 + (buff == null ? 0 : 0.05 * buff.getAmount()));
+        // Replace the placeholders
         replaceItem("executor", (slot, itemBuilder) -> {
             return itemBuilder.replaceDisplay(s -> s.replace("{chance}", String.format("%.2f", chance)));
         });

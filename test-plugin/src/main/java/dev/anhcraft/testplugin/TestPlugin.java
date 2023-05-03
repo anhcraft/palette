@@ -1,10 +1,11 @@
 package dev.anhcraft.testplugin;
 
+import dev.anhcraft.config.bukkit.BukkitConfigDeserializer;
 import dev.anhcraft.config.bukkit.BukkitConfigProvider;
 import dev.anhcraft.config.bukkit.struct.YamlConfigSection;
 import dev.anhcraft.config.schema.SchemaScanner;
-import dev.anhcraft.palette.ui.Gui;
 import dev.anhcraft.palette.listener.GuiEventListener;
+import dev.anhcraft.palette.ui.Gui;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -18,7 +19,7 @@ public final class TestPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         try {
-            upgradeGui = BukkitConfigProvider.YAML.createDeserializer().transformConfig(
+            upgradeGui = new BukkitConfigDeserializer(BukkitConfigProvider.YAML).transformConfig(
                     Objects.requireNonNull(SchemaScanner.scanConfig(Gui.class)),
                     new YamlConfigSection(YamlConfiguration.loadConfiguration(new InputStreamReader(Objects.requireNonNull(TestPlugin.class.getResourceAsStream("/gui.yml")))))
             );

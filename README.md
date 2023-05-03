@@ -18,6 +18,62 @@ However, Palette is not mean to:
 - Create complex, animated GUIs
 - Replace existing menu plugins
 
+## Dependency
+Palette **requires** [Config](https://github.com/anhcraft/config) library to assist in serializing and deserializing configuration.
+
+## Add Palette as shadow dependency
+
+Example Maven configuration:
+```xml
+<repository>
+   <id>jitpack.io</id>
+   <url>https://jitpack.io</url>
+</repository>
+```
+```xml
+<dependency>
+   <groupId>com.github.anhcraft</groupId>
+   <artifactId>palette</artifactId>
+   <version>v1.0.2</version>
+   <scope>compile</scope>
+</dependency>
+<dependency>
+   <groupId>com.github.anhcraft.config</groupId>
+   <artifactId>config.bukkit</artifactId>
+   <version>v1.1.5</version>
+   <scope>compile</scope>
+</dependency>
+```
+
+Also, relocate Palette as well to prevent any conflicts. Example Maven configuration in pom.xml:
+```xml
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-shade-plugin</artifactId>
+  <version>VERSION</version>
+  <executions>
+    <execution>
+      <phase>package</phase>
+        <goals>
+          <goal>shade</goal>
+        </goals>
+        <configuration>
+          <relocations>
+             <relocation>
+                <pattern>dev.anhcraft.palette</pattern>
+                <shadedPattern>path.to.your.plugin.palette</shadedPattern>
+             </relocation>
+             <relocation>
+                <pattern>dev.anhcraft.config</pattern>
+                <shadedPattern>path.to.your.plugin.config</shadedPattern>
+             </relocation>
+          </relocations>
+        </configuration>
+      </execution>
+    </executions>
+  </plugin>
+```
+
 ## Getting Started
 With Palette, every GUI must have its own configuration file.
 
@@ -79,88 +135,10 @@ unbreakable: true
 ## Terminology
 
 - Background item: Since Palette allows customizable background item, we say that an item is background if it is either empty or be the background defined in the configuration
-- Backup layer: The backup layer contains all original items defined in the configuration
-- Backed item: To improve the performance, Palette creates a cached version of the original item (equivalent to the backup layer), that version is said to be baked
+- Original layer: The layer contains all original items defined in the configuration
+- Baked item: To improve the performance, Palette creates a cached version of the original item (equivalent to the baked layer), that version is said to be baked
 - Actual item: Is any item that is existing in the current GUI (which may be different from the configuration). If the actual item is background, it is treated as empty item.
 - Modifiable component: A modifiable component means it can be changed either by placing item or taking out item. With Palette, you can define the component to be placing-only or taking-out-only
-- Refreshable: Refreshable GUI requires the GUi to be refreshed / updated for every successful interaction. This is the essential interface to create dynamic GUIs with Palette.
-
-## How does it work?
-On initialization:
-1. GUI configuration is loaded
-2. Colorize item name and lore
-3. Create baked items for the backup layer
-<br>
-
-Whenever a GUI instance is created:
-1. Create an `Inventory` with items from the backup layer
-2. Fire `onPreOpen` event. During this time, the plugin can replace placeholders in name and lore.
-3. Show the inventory
-<br>
-
-Whenever the player interacts with GUI (place item, take out item, drag item, etc)
-1. Palette automatically handles common interactions on **modifiable components** such as: cloning a stack in creative mode, splitting item, merging item, etc
-- In this case, Palette will refresh the GUI if it is refreshable
-2. If the component is unmodifiable, it fallbacks the responsibility to the plugin by firing `onClick` event
-- Palette won't refresh the GUI no matter if it is refreshable
-<br>
-
-Whenever the GUI is closed:
-1. Palette tries to move items in modifiable components to the main inventory. If it is full, items will be dropped.
-2. Fire `onClose` event
-
-## Dependency
-Palette **requires** [Config](https://github.com/anhcraft/config) library to assist in serializing and deserializing configuration.
-
-## Add Palette as shadow dependency
-
-Example Maven configuration:
-```xml
-<repository>
-   <id>jitpack.io</id>
-   <url>https://jitpack.io</url>
-</repository>
-```
-```xml
-<dependency>
-   <groupId>com.github.anhcraft</groupId>
-   <artifactId>palette</artifactId>
-   <version>v1.0.2</version>
-   <scope>compile</scope>
-</dependency>
-<dependency>
-   <groupId>com.github.anhcraft.config</groupId>
-   <artifactId>config.bukkit</artifactId>
-   <version>v1.1.5</version>
-   <scope>compile</scope>
-</dependency>
-```
-
-Also, relocate Palette as well to prevent any conflicts. Example Maven configuration in pom.xml:
-```xml
-<plugin>
-  <groupId>org.apache.maven.plugins</groupId>
-  <artifactId>maven-shade-plugin</artifactId>
-  <version>VERSION</version>
-  <executions>
-    <execution>
-      <phase>package</phase>
-        <goals>
-          <goal>shade</goal>
-        </goals>
-        <configuration>
-          <relocations>
-            <relocation>
-              <pattern>dev.anhcraft.palette</pattern>
-              <shadedPattern>path.to.your.plugin.palette</shadedPattern>
-            </relocation>
-          </relocations>
-        </configuration>
-      </execution>
-    </executions>
-  </plugin>
-```
-(You can do the same with Gradle, just google)
 
 ## Register event listener
 As your plugin is going to bundle Palette (shadow dependency), ensure the event listener is registered
@@ -171,101 +149,15 @@ getServer().getPluginManager().registerEvents(new GuiEventListener(plugin), plug
 
 ## Create GUI Handler
 A GUI handler is one that controls a GUI instance / view.
-
-Take a look at the test plugin:
-```java
-public class UpgradeGuiHandler extends GuiHandler implements Refreshable {
-    public UpgradeGuiHandler() {
-        createModifiableComponent("item");
-        createModifiableComponent("buff").maxStackSize(32);
-    }
-
-    @Override
-    public void onPreOpen(@NotNull HumanEntity humanEntity) {
-        refreshView(humanEntity);
-    }
-
-    @Override
-    public void onClick(@NotNull InventoryClickEvent clickEvent, @NotNull String component) {
-        if (component.equals("executor")) {
-            ItemStack item = collectPresentItem("item");
-            if (item == null) {
-                clickEvent.getWhoClicked().sendMessage(ChatColor.RED + "No item.");
-                return;
-            }
-
-            ItemStack buff = collectPresentItem("buff");
-            double chance = Math.min(1.0, 0.5 + (buff == null ? 0 : 0.05 * buff.getAmount()));
-
-            if (ThreadLocalRandom.current().nextDouble() < chance) {
-                item.addEnchantment(Enchantment.DAMAGE_ALL, 3);
-                item.addEnchantment(Enchantment.FIRE_ASPECT, 2);
-                setItemOnce("item", item);
-                clickEvent.getWhoClicked().sendMessage(ChatColor.GREEN + "Upgrade successful.");
-            } else {
-                clickEvent.getWhoClicked().sendMessage(ChatColor.RED + "Upgrade failed.");
-            }
-
-            resetItems("buff");
-            refreshView(clickEvent.getWhoClicked());
-        }
-    }
-
-    @Override
-    public boolean canPut(@NotNull String component, @NotNull ItemStack item) {
-        if (component.equals("item")) {
-            return item.getType().name().endsWith("_SWORD");
-        } else if (component.equals("buff")) {
-            return item.getType() == Material.LAPIS_LAZULI;
-        }
-        return super.canPut(component, item);
-    }
-
-    @Override
-    public void refreshView(@NotNull HumanEntity humanEntity) {
-        ItemStack buff = collectPresentItem("buff");
-        double chance = Math.min(1.0, 0.5 + (buff == null ? 0 : 0.05 * buff.getAmount()));
-        replaceItems("executor", itemBuilder -> itemBuilder.replaceDisplay(s -> s.replace("{chance}", String.format("%.2f", chance))));
-    }
-}
-```
-
-Let's explain how the code above works!
-First, we define modifiable components, there are two: "item" and "buff". With "buff", we configure a custom maximum stack size of 32 (normally, it should be 64).<br>
-**Note: If we don't define the maximum stack size, it defaults to 64**
-
-There are four methods:
-- `onPreOpen`: called after the GUI is created and is going to be displayed to player
-- `onClick`: when the player clicks on a slot (should be unmodifiable component)
-- `canPut`: checks if the item can be put into a specific component
-- `refreshView`: called whenever Palette handles an interaction
-
-`onClose` is not specified since we want to preserve the default behaviour.
-
-With the idea from Getting Started section, we can implement GUI Handler step-by-step:
-
-1. When opened, replace the placeholder to its default value
-   - This can be done using `onPreOpen` event
-2. Update the chance automatically
-   - This can be done using `refreshView` event
-   - So whenever the sword or the buff item is put or taken out, the chance is re-updated
-   - #1 and #2 can be combined to a single method as shown in the code
-3. Validate items
-   - This can be done via `canPut`
-4. Listen to upgrade button click
-   - This can be done using `onClick` event
-   - First, we collect necessary ingredients: the sword and the buff item
-   - Then we calculate the chance, randomize and upgrade the item
-   - Next, we update ingredient slots
-   - Finally, it's important to re-update the chance
+Have a look at the test plugin: [UpgradeGuiHandler](https://github.com/anhcraft/palette/blob/main/test-plugin/src/main/java/dev/anhcraft/testplugin/UpgradeGuiHandler.java)
 
 ## Load configuration
 Load a resource (inside .jar):
 ```java
 try {
-   Gui upgradeGui = BukkitConfigProvider.YAML.createDeserializer().transformConfig(
-           Objects.requireNonNull(SchemaScanner.scanConfig(Gui.class)),
-           new YamlConfigSection(YamlConfiguration.loadConfiguration(new InputStreamReader(Objects.requireNonNull(TestPlugin.class.getResourceAsStream("/gui.yml")))))
+   Gui upgradeGui = new BukkitConfigDeserializer(BukkitConfigProvider.YAML).transformConfig(
+        Objects.requireNonNull(SchemaScanner.scanConfig(Gui.class)),
+        new YamlConfigSection(YamlConfiguration.loadConfiguration(new InputStreamReader(Objects.requireNonNull(TestPlugin.class.getResourceAsStream("/gui.yml")))))
    );
 } catch (Exception e) {
    throw new RuntimeException(e);
@@ -275,9 +167,9 @@ try {
 Load from a file:
 ```java
 try {
-   Gui upgradeGui = BukkitConfigProvider.YAML.createDeserializer().transformConfig(
-           Objects.requireNonNull(SchemaScanner.scanConfig(Gui.class)),
-           new YamlConfigSection(YamlConfiguration.loadConfiguration(new File("gui.yml")))
+   Gui upgradeGui = new BukkitConfigDeserializer(BukkitConfigProvider.YAML).transformConfig(
+        Objects.requireNonNull(SchemaScanner.scanConfig(Gui.class)),
+        new YamlConfigSection(YamlConfiguration.loadConfiguration(new File("gui.yml")))
    );
 } catch (Exception e) {
    throw new RuntimeException(e);
