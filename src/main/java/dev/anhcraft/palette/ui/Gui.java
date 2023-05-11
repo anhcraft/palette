@@ -67,7 +67,7 @@ public class Gui {
                 if (component == null) {
                     throw new RuntimeException(String.format("Component not found %s at slot x=%d, y=%d, i=%d", s.charAt(x), x, y, i));
                 }
-                slots[i] = new Slot(component);
+                slots[i] = new Slot(i, component);
             }
         }
 

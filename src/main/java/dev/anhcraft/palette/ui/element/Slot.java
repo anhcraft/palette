@@ -15,11 +15,13 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Slot {
+    private final int position;
     private final Component component;
     private List<Event> events = Collections.synchronizedList(new ArrayList<>());
     private Modifiability modifiability;
 
-    public Slot(@NotNull Component component) {
+    public Slot(int position, @NotNull Component component) {
+        this.position = position;
         this.component = component;
 
         listen(new PostPlaceEvent() {
@@ -49,6 +51,10 @@ public class Slot {
                 player.playSound(player.getLocation(), Sound.ITEM_SHIELD_BLOCK, 0.5f, 1.0f);
             }
         });
+    }
+
+    public int getPosition() {
+        return position;
     }
 
     @NotNull
