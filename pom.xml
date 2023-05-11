@@ -81,7 +81,7 @@
         <dependency>
             <groupId>com.github.anhcraft.config</groupId>
             <artifactId>config.bukkit</artifactId>
-            <version>v1.1.6</version>
+            <version>-3187565e88-1</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
