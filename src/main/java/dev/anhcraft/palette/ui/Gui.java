@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 @Configurable
@@ -49,14 +50,15 @@ public class Gui {
      * Opens a GUI for the given entity.
      * @param player The entity to open the GUI for
      * @param guiHandler The GUI handler
+     * @param titleReplacer A function to replace the title of the GUI
      */
-    public void open(@NotNull Player player, @NotNull GuiHandler guiHandler) {
+    public void open(@NotNull Player player, @NotNull GuiHandler guiHandler, @NotNull UnaryOperator<String> titleReplacer) {
         InventoryHolder h = player.getOpenInventory().getTopInventory().getHolder();
         if (h instanceof GuiHandler) {
             ((GuiHandler) h).onClose(player);
         }
 
-        Inventory inv = Bukkit.createInventory(guiHandler, layout.size() * 9, ChatColor.translateAlternateColorCodes('&', title));
+        Inventory inv = Bukkit.createInventory(guiHandler, layout.size() * 9, titleReplacer.apply(ChatColor.translateAlternateColorCodes('&', title)));
         Slot[] slots = new Slot[inv.getSize()];
 
         for (int y = 0; y < layout.size(); ++y) {
@@ -76,5 +78,14 @@ public class Gui {
         guiHandler.onPreOpen(player);
         player.openInventory(inv);
         player.playSound(player.getLocation(), openSound, 1.0f, 1.0f);
+    }
+
+    /**
+     * Opens a GUI for the given entity.
+     * @param player The entity to open the GUI for
+     * @param guiHandler The GUI handler
+     */
+    public void open(@NotNull Player player, @NotNull GuiHandler guiHandler) {
+        open(player, guiHandler, UnaryOperator.identity());
     }
 }
