@@ -100,7 +100,8 @@ public class ItemUtil {
      */
     public static void addToInventory(@NotNull HumanEntity entity, @NotNull ItemStack ... items) {
         for (ItemStack i : entity.getInventory().addItem(items).values()) {
-            entity.getWorld().dropItem(entity.getLocation(), i);
+            if (isPresent(i))
+                entity.getWorld().dropItem(entity.getLocation(), i);
         }
     }
 
