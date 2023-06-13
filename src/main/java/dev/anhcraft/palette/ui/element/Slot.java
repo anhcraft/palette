@@ -67,6 +67,10 @@ public class Slot {
         return Collections.unmodifiableList(events);
     }
 
+    public void clearEvents() {
+        this.events = Collections.synchronizedList(new ArrayList<>());
+    }
+
     public void setEvents(@NotNull List<Event> events) {
         this.events = Collections.synchronizedList(events);
     }
