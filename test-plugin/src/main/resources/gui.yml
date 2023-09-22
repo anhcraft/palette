@@ -10,19 +10,19 @@ components:
   "I":
     type: item
     material: LIME_STAINED_GLASS_PANE
-    name: "&aItem"
+    name: "&#5abd3cItem"
     lore:
       - "&7» Put the sword to be upgraded"
   "B":
     type: buff
     material: YELLOW_STAINED_GLASS_PANE
-    name: "&aBuff"
+    name: "&#e6ce49Buff"
     lore:
       - "&7» Put the bonus item (Lapis) here"
   "E":
     type: executor
     material: ANVIL
-    name: "&bUpgrade"
+    name: "&#f04a81Upgrade"
     lore:
       - "&7» Click to upgrade the item"
       - "&7» Chance: &a{chance}%"

@@ -12,13 +12,9 @@
     <name>Palette</name>
 
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>11</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <modules>
-
-    </modules>
 
     <build>
         <plugins>
@@ -81,7 +77,7 @@
         <dependency>
             <groupId>com.github.anhcraft.config</groupId>
             <artifactId>config.bukkit</artifactId>
-            <version>v1.1.7</version>
+            <version>v1.1.8</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
