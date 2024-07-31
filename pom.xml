@@ -6,7 +6,7 @@
 
     <groupId>dev.anhcraft</groupId>
     <artifactId>palette</artifactId>
-    <version>1.0.8</version>
+    <version>1.0.9</version>
     <packaging>jar</packaging>
 
     <name>Palette</name>
@@ -56,7 +56,7 @@
         <dependency>
             <groupId>com.github.anhcraft.config</groupId>
             <artifactId>config.bukkit</artifactId>
-            <version>v1.2.2</version>
+            <version>v1.2.4</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
